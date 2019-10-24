@@ -55,14 +55,14 @@ func (r *Register) Register(conn net.Conn) {
 
 	if !req.Verify() {
 		fmt.Println("verify failed->:", req.String())
-		conn.Write(newRegResponse(false, -1, "verify failed"))
+		conn.Write(newRegResponse(false, 1, "verify failed"))
 		return
 	}
 
 	if err := r.db.save(req); err != nil {
 		e := fmt.Errorf("save data base err:%s", err)
 		fmt.Println(e)
-		conn.Write(newRegResponse(false, -2, e.Error()))
+		conn.Write(newRegResponse(false, 2, e.Error()))
 		return
 	}
 
