@@ -12,7 +12,7 @@ type Register struct {
 }
 
 func newReg(db *BASTable) *Register {
-	srv, err := net.ListenTCP("tcp", &net.TCPAddr{Port: 54})
+	srv, err := net.ListenTCP("tcp", &net.TCPAddr{Port: DNSSPort})
 	if err != nil {
 		panic(err)
 	}

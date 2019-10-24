@@ -17,7 +17,9 @@ const (
 	IPV4
 	IPV6
 
-	BufSize = 1024
+	BufSize  = 1024
+	DNSGPort = 53
+	DNSSPort = 54
 )
 
 type BlockChainAddr struct {

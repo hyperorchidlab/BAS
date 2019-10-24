@@ -29,5 +29,8 @@ all: build
 build:
 	GOOS=$(OS) GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)
 
+test:
+	GOOS=darwin go build -ldflags '-w -s' -o $(BINDIR)/$(NAME)
+
 clean:
 	rm $(BINDIR)/$(NAME)

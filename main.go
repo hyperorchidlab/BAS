@@ -23,11 +23,10 @@ var rootCmd = &cobra.Command{
 
 	Run: mainRun,
 }
-var param struct {
-	version bool
-	debug   bool
-	dbPath  string
-	pidPath string
+var Conf struct {
+	Version bool
+	DBPath  string
+	PidPath string
 }
 
 func BaseDir() string {
@@ -45,15 +44,13 @@ func init() {
 	defaultDB := filepath.Join(base, string(filepath.Separator), "baseBook")
 	defaultPid := filepath.Join(base, string(filepath.Separator), ".pid")
 
-	rootCmd.Flags().BoolVarP(&param.version, "version",
-		"v", false, "show current version")
-	rootCmd.Flags().BoolVarP(&param.debug, "debug",
-		"d", false, "run in debug model")
-	rootCmd.Flags().StringVarP(&param.dbPath, "database", "b", defaultDB, "BAS -b [DATA BASE DIR]")
-	param.pidPath = defaultPid
+	rootCmd.Flags().BoolVarP(&Conf.Version, "Version", "v", false, "show current Version")
+	rootCmd.Flags().StringVarP(&Conf.DBPath, "database", "b", defaultDB, "BAS -b [DATA BASE DIR]")
+	Conf.PidPath = defaultPid
 }
 
 func main() {
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -61,12 +58,12 @@ func main() {
 }
 
 func mainRun(_ *cobra.Command, _ []string) {
-	if param.version {
+	if Conf.Version {
 		fmt.Println(Version)
 		return
 	}
 
-	db := initTable(param.dbPath)
+	db := initTable(Conf.DBPath)
 	searchSrv := UDPSrv(db)
 
 	saveSrv := newReg(db)
@@ -81,7 +78,7 @@ func mainRun(_ *cobra.Command, _ []string) {
 func waitSignal(done chan bool) {
 	pid := strconv.Itoa(os.Getpid())
 	fmt.Printf("\n>>>>>>>>>>BAS start at pid(%s)<<<<<<<<<<\n", pid)
-	if err := ioutil.WriteFile(param.pidPath, []byte(pid), 0644); err != nil {
+	if err := ioutil.WriteFile(Conf.PidPath, []byte(pid), 0644); err != nil {
 		fmt.Print("failed to write running pid", err)
 	}
 
