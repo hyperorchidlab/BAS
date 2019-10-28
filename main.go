@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/hyperorchidlab/BAS/dbSrv"
+	"github.com/hyperorchidlab/BAS/querySrv"
+	"github.com/hyperorchidlab/BAS/regSrv"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
@@ -63,10 +66,10 @@ func mainRun(_ *cobra.Command, _ []string) {
 		return
 	}
 
-	db := initTable(Conf.DBPath)
-	searchSrv := UDPSrv(db)
+	db := dbSrv.InitTable(Conf.DBPath)
+	searchSrv := querySrv.UDPSrv(db)
 
-	saveSrv := newReg(db)
+	saveSrv := regSrv.NewReg(db)
 	done := make(chan bool, 1)
 
 	go searchSrv.Run(done)

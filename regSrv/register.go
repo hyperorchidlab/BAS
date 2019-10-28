@@ -1,18 +1,19 @@
-package main
+package regSrv
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hyperorchidlab/BAS/dbSrv"
 	"net"
 )
 
 type Register struct {
-	db  *BASTable
+	db  *dbSrv.BASTable
 	srv net.Listener
 }
 
-func newReg(db *BASTable) *Register {
-	srv, err := net.ListenTCP("tcp", &net.TCPAddr{Port: DNSSPort})
+func NewReg(db *dbSrv.BASTable) *Register {
+	srv, err := net.ListenTCP("tcp", &net.TCPAddr{Port: dbSrv.DNSSPort})
 	if err != nil {
 		panic(err)
 	}
@@ -40,14 +41,14 @@ func (r *Register) Serve(done chan bool) {
 func (r *Register) Register(conn net.Conn) {
 	defer conn.Close()
 
-	buf := make([]byte, BufSize)
+	buf := make([]byte, dbSrv.BufSize)
 	n, err := conn.Read(buf)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	req := &RegRequest{}
+	req := &dbSrv.RegRequest{}
 	if err := json.Unmarshal(buf[:n], req); err != nil {
 		fmt.Println(err)
 		return
@@ -55,16 +56,16 @@ func (r *Register) Register(conn net.Conn) {
 
 	if !req.Verify() {
 		fmt.Println("verify failed->:", req.String())
-		conn.Write(newRegResponse(false, 1, "verify failed"))
+		conn.Write(dbSrv.NewRegResponse(false, 1, "verify failed"))
 		return
 	}
 
-	if err := r.db.save(req); err != nil {
+	if err := r.db.Save(req); err != nil {
 		e := fmt.Errorf("save data base err:%s", err)
 		fmt.Println(e)
-		conn.Write(newRegResponse(false, 2, e.Error()))
+		conn.Write(dbSrv.NewRegResponse(false, 2, e.Error()))
 		return
 	}
 
-	conn.Write(newRegResponse(true, 0, ""))
+	conn.Write(dbSrv.NewRegResponse(true, 0, ""))
 }

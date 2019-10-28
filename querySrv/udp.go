@@ -1,18 +1,19 @@
-package main
+package querySrv
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hyperorchidlab/BAS/dbSrv"
 	"net"
 )
 
 type UDPBAS struct {
-	book *BASTable
+	book *dbSrv.BASTable
 	srv  *net.UDPConn
 }
 
-func UDPSrv(db *BASTable) *UDPBAS {
-	srv, err := net.ListenUDP("udp", &net.UDPAddr{Port: DNSGPort})
+func UDPSrv(db *dbSrv.BASTable) *UDPBAS {
+	srv, err := net.ListenUDP("udp", &net.UDPAddr{Port: dbSrv.DNSGPort})
 	if err != nil {
 		panic(err)
 	}
@@ -26,7 +27,7 @@ func (tb *UDPBAS) Run(done chan bool) {
 	defer tb.srv.Close()
 
 	for {
-		buf := make([]byte, BufSize)
+		buf := make([]byte, dbSrv.BufSize)
 		n, addr, err := tb.srv.ReadFromUDP(buf)
 		if err != nil {
 			fmt.Println(err)
@@ -40,7 +41,7 @@ func (tb *UDPBAS) Run(done chan bool) {
 
 func (tb *UDPBAS) answer(data []byte, from *net.UDPAddr) {
 	var (
-		req            = &BlockChainAddr{}
+		req            = &dbSrv.BlockChainAddr{}
 		resData []byte = nil
 	)
 
@@ -49,12 +50,12 @@ func (tb *UDPBAS) answer(data []byte, from *net.UDPAddr) {
 		return
 	}
 
-	record := tb.book.find(req)
+	record := tb.book.Find(req)
 
 	if record == nil {
-		resData = EmptyData
+		resData = dbSrv.EmptyData
 	} else {
-		resData, _ = json.Marshal(&NetworkAddr{
+		resData, _ = json.Marshal(&dbSrv.NetworkAddr{
 			BTyp:    record.BType,
 			NTyp:    record.NType,
 			NetAddr: record.NAddr,

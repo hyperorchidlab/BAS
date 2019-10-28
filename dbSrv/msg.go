@@ -1,4 +1,4 @@
-package main
+package dbSrv
 
 import (
 	"encoding/json"
@@ -50,7 +50,7 @@ type RegResponse struct {
 	MSG     string `json:"msg"`
 }
 
-func newRegResponse(success bool, eno uint8, msg string) []byte {
+func NewRegResponse(success bool, eno uint8, msg string) []byte {
 	var err = &RegResponse{
 		Success: success,
 		ENO:     eno,

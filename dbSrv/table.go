@@ -1,4 +1,4 @@
-package main
+package dbSrv
 
 import (
 	"encoding/json"
@@ -19,7 +19,7 @@ type Record struct {
 	NAddr []byte `json:"na"`
 }
 
-func initTable(path string) *BASTable {
+func InitTable(path string) *BASTable {
 	opts := opt.Options{
 		Strict:      opt.DefaultStrict,
 		Compression: opt.NoCompression,
@@ -34,7 +34,7 @@ func initTable(path string) *BASTable {
 	return &BASTable{database: db}
 }
 
-func (book *BASTable) find(ba *BlockChainAddr) *Record {
+func (book *BASTable) Find(ba *BlockChainAddr) *Record {
 	if has, err := book.database.Has(ba.BlockAddr, nil); !has || err != nil {
 		fmt.Println(err)
 		return nil
@@ -54,7 +54,7 @@ func (book *BASTable) find(ba *BlockChainAddr) *Record {
 	return r
 }
 
-func (book *BASTable) save(req *RegRequest) error {
+func (book *BASTable) Save(req *RegRequest) error {
 
 	if _, err := book.database.Has(req.BlockAddr, nil); err != nil {
 		return err
