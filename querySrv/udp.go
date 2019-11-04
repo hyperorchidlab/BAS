@@ -3,6 +3,7 @@ package querySrv
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hyperorchid/go-miner-pool/common"
 	"github.com/hyperorchidlab/BAS/dbSrv"
 	"net"
 )
@@ -34,8 +35,12 @@ func (tb *UDPBAS) Run(done chan bool) {
 			done <- false
 			return
 		}
-		fmt.Println(addr)
-		go tb.answer(buf[:n], addr)
+
+		common.NewThread(func(sig chan struct{}) {
+			tb.answer(buf[:n], addr)
+		}, func(err interface{}) {
+			_, _ = tb.srv.WriteToUDP(dbSrv.EmptyData, addr)
+		}).Start()
 	}
 }
 
@@ -46,23 +51,19 @@ func (tb *UDPBAS) answer(data []byte, from *net.UDPAddr) {
 	)
 
 	if err := json.Unmarshal(data, req); err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	}
 
 	record := tb.book.Find(req)
-
 	if record == nil {
-		resData = dbSrv.EmptyData
-	} else {
-		resData, _ = json.Marshal(&dbSrv.NetworkAddr{
-			BTyp:    record.BType,
-			NTyp:    record.NType,
-			NetAddr: record.NAddr,
-		})
+		_, _ = tb.srv.WriteToUDP(dbSrv.EmptyData, from)
+		return
 	}
-
-	if _, err := tb.srv.WriteToUDP(resData, from); err != nil {
-		fmt.Println(err)
-	}
+	fmt.Println(string(record.NAddr))
+	resData, _ = json.Marshal(&dbSrv.NetworkAddr{
+		BTyp:    record.BType,
+		NTyp:    record.NType,
+		NetAddr: record.NAddr,
+	})
+	_, _ = tb.srv.WriteToUDP(resData, from)
 }

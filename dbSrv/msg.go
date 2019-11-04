@@ -33,6 +33,17 @@ type NetworkAddr struct {
 	NetAddr []byte `json:"networkAddr"`
 }
 
+func (na *NetworkAddr) String() string {
+	return fmt.Sprintf("\n------------------\n"+
+		"\n network type:%d"+
+		"\n blockChain type:%d"+
+		"\n network address:%s"+
+		"\n------------------\n",
+		na.NTyp,
+		na.BTyp,
+		string(na.NetAddr))
+}
+
 var Empty = &NetworkAddr{
 	NTyp: NoItem,
 }
@@ -81,20 +92,17 @@ func (req *RegRequest) String() string {
 		"\n*********************\n", req.BTyp, req.NTyp, req.NetAddr)
 }
 
-func ConvertIP(ip string) (uint8, []byte, error) {
+func CheckIPType(ip string) (uint8, error) {
 
 	netIP := net.ParseIP(ip)
 	if netIP == nil {
-		return NoItem, nil, fmt.Errorf("parse ip[%s] failed", ip)
+		return NoItem, fmt.Errorf("parse ip[%s] failed", ip)
 	}
-
 	fmt.Println(netIP, len(netIP))
-
-	if len(netIP) == net.IPv4len {
-		return IPV4, netIP[:], nil
-	} else if len(netIP) == net.IPv6len {
-		return IPV6, netIP[:], nil
+	if netIP.To4() != nil {
+		return IPV4, nil
+	} else if netIP.To16() != nil {
+		return IPV6, nil
 	}
-
-	return NoItem, nil, fmt.Errorf("invalid ip string[%s]", ip)
+	return NoItem, fmt.Errorf("invalid ip string[%s]", ip)
 }

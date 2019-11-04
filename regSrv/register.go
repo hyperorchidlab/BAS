@@ -58,6 +58,9 @@ func (r *Register) Register(jsonCon *network.JsonConn) {
 		return
 	}
 
+	fmt.Println(string(req.BlockAddr), len(req.BlockAddr))
+	fmt.Println(req.String())
+
 	if err := r.db.Save(req); err != nil {
 		e := fmt.Errorf("save data base err:%s", err)
 		fmt.Println(e)
