@@ -9,14 +9,14 @@ import (
 )
 
 const (
-	_ = iota
-	BTECDSA
-	BTEd25519
+	_         = iota
+	BTECDSA   = 1
+	BTEd25519 = 2
 
-	_ = iota
-	NoItem
-	IPV4
-	IPV6
+	_      = iota
+	NoItem = 1
+	IPV4   = 2
+	IPV6   = 3
 
 	BufSize      = 1024
 	BASQueryPort = 53
@@ -28,9 +28,9 @@ type BlockChainAddr struct {
 }
 
 type NetworkAddr struct {
-	NTyp    uint8  `json:"nt"`
-	BTyp    uint8  `json:"bt"`
-	NetAddr []byte `json:"na"`
+	NTyp    uint8  `json:"networkType"`
+	BTyp    uint8  `json:"blockChainType"`
+	NetAddr []byte `json:"networkAddr"`
 }
 
 var Empty = &NetworkAddr{
@@ -41,7 +41,7 @@ var EmptyData, _ = json.Marshal(Empty)
 
 type RegRequest struct {
 	Sig          []byte `json:"sig"`
-	BlockAddr    []byte `json:"ba"`
+	BlockAddr    []byte `json:"blockChainAddr"`
 	*NetworkAddr `json:"data"`
 }
 
@@ -51,14 +51,12 @@ type RegResponse struct {
 	MSG     string `json:"msg"`
 }
 
-func NewRegResponse(success bool, eno uint8, msg string) []byte {
-	var err = &RegResponse{
+func NewRegResponse(success bool, eno uint8, msg string) *RegResponse {
+	return &RegResponse{
 		Success: success,
 		ENO:     eno,
 		MSG:     msg,
 	}
-	b, _ := json.Marshal(err)
-	return b
 }
 
 func (req *RegRequest) Verify() bool {
@@ -70,8 +68,6 @@ func (req *RegRequest) Verify() bool {
 	case BTEd25519:
 		id := account.ID(string(req.BlockAddr))
 		return account.VerifySubSig(id, req.Sig, req.NetworkAddr)
-	case NoItem:
-		return false
 	default:
 		return false
 	}
@@ -89,12 +85,14 @@ func ConvertIP(ip string) (uint8, []byte, error) {
 
 	netIP := net.ParseIP(ip)
 	if netIP == nil {
-		return NoItem, nil, fmt.Errorf("invalid ip string[%s]", ip)
+		return NoItem, nil, fmt.Errorf("parse ip[%s] failed", ip)
 	}
+
+	fmt.Println(netIP, len(netIP))
 
 	if len(netIP) == net.IPv4len {
 		return IPV4, netIP[:], nil
-	} else if len(netIP) == net.IPv4len {
+	} else if len(netIP) == net.IPv6len {
 		return IPV6, netIP[:], nil
 	}
 
