@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/hyperorchid/go-miner-pool/account"
+	"net"
 )
 
 const (
@@ -17,9 +18,9 @@ const (
 	IPV4
 	IPV6
 
-	BufSize  = 1024
-	DNSGPort = 53
-	DNSSPort = 54
+	BufSize      = 1024
+	BASQueryPort = 53
+	BASRegPort   = 54
 )
 
 type BlockChainAddr struct {
@@ -82,4 +83,20 @@ func (req *RegRequest) String() string {
 		"\n*NetworkType:\t%d"+
 		"\n*NetworkAddr:\t%s"+
 		"\n*********************\n", req.BTyp, req.NTyp, req.NetAddr)
+}
+
+func ConvertIP(ip string) (uint8, []byte, error) {
+
+	netIP := net.ParseIP(ip)
+	if netIP == nil {
+		return NoItem, nil, fmt.Errorf("invalid ip string[%s]", ip)
+	}
+
+	if len(netIP) == net.IPv4len {
+		return IPV4, netIP[:], nil
+	} else if len(netIP) == net.IPv4len {
+		return IPV6, netIP[:], nil
+	}
+
+	return NoItem, nil, fmt.Errorf("invalid ip string[%s]", ip)
 }

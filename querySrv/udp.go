@@ -13,7 +13,7 @@ type UDPBAS struct {
 }
 
 func UDPSrv(db *dbSrv.BASTable) *UDPBAS {
-	srv, err := net.ListenUDP("udp", &net.UDPAddr{Port: dbSrv.DNSGPort})
+	srv, err := net.ListenUDP("udp", &net.UDPAddr{Port: dbSrv.BASQueryPort})
 	if err != nil {
 		panic(err)
 	}

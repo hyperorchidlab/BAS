@@ -1,8 +1,8 @@
 package regSrv
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/hyperorchid/go-miner-pool/network"
 	"github.com/hyperorchidlab/BAS/dbSrv"
 	"net"
 )
@@ -13,7 +13,7 @@ type Register struct {
 }
 
 func NewReg(db *dbSrv.BASTable) *Register {
-	srv, err := net.ListenTCP("tcp", &net.TCPAddr{Port: dbSrv.DNSSPort})
+	srv, err := net.ListenTCP("tcp", &net.TCPAddr{Port: dbSrv.BASRegPort})
 	if err != nil {
 		panic(err)
 	}
@@ -39,17 +39,11 @@ func (r *Register) Serve(done chan bool) {
 }
 
 func (r *Register) Register(conn net.Conn) {
+
 	defer conn.Close()
-
-	buf := make([]byte, dbSrv.BufSize)
-	n, err := conn.Read(buf)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
+	jsonCon := network.JsonConn{Conn: conn}
 	req := &dbSrv.RegRequest{}
-	if err := json.Unmarshal(buf[:n], req); err != nil {
+	if err := jsonCon.ReadJsonMsg(req); err != nil {
 		fmt.Println(err)
 		return
 	}

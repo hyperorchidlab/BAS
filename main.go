@@ -38,7 +38,7 @@ func BaseDir() string {
 		panic(err)
 	}
 
-	baseDir := filepath.Join(usr.HomeDir, string(filepath.Separator), ".bas")
+	baseDir := filepath.Join(usr.HomeDir, string(filepath.Separator), ".bass")
 	return baseDir
 }
 
