@@ -52,7 +52,7 @@ func (r *Register) Register(jsonCon *network.JsonConn) {
 		return
 	}
 
-	if !req.Verify() {
+	if !dbSrv.Verify(req.BTyp, req.BlockAddr, req.NetworkAddr, req.Sig) {
 		fmt.Println("verify failed->:", req.String())
 		_ = jsonCon.WriteJsonMsg(dbSrv.NewRegResponse(false, 1, "verify failed"))
 		return

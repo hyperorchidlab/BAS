@@ -46,7 +46,7 @@ func (tb *UDPBAS) Run(done chan bool) {
 
 func (tb *UDPBAS) answer(data []byte, from *net.UDPAddr) {
 	var (
-		req            = &dbSrv.BlockChainAddr{}
+		req            = &dbSrv.BasQuery{}
 		resData []byte = nil
 	)
 
@@ -60,10 +60,13 @@ func (tb *UDPBAS) answer(data []byte, from *net.UDPAddr) {
 		return
 	}
 	fmt.Println(string(record.NAddr))
-	resData, _ = json.Marshal(&dbSrv.NetworkAddr{
-		BTyp:    record.BType,
-		NTyp:    record.NType,
-		NetAddr: record.NAddr,
+	resData, _ = json.Marshal(&dbSrv.BasAnswer{
+		Sig: record.Sig,
+		NetworkAddr: &dbSrv.NetworkAddr{
+			BTyp:    record.BType,
+			NTyp:    record.NType,
+			NetAddr: record.NAddr,
+		},
 	})
 	_, _ = tb.srv.WriteToUDP(resData, from)
 }

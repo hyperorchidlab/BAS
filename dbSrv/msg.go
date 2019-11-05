@@ -23,8 +23,13 @@ const (
 	BASRegPort   = 54
 )
 
-type BlockChainAddr struct {
+type BasQuery struct {
 	BlockAddr []byte `json:"ba"`
+}
+
+type BasAnswer struct {
+	Sig []byte `json:"signature"`
+	*NetworkAddr
 }
 
 type NetworkAddr struct {
@@ -70,15 +75,15 @@ func NewRegResponse(success bool, eno uint8, msg string) *RegResponse {
 	}
 }
 
-func (req *RegRequest) Verify() bool {
+func Verify(typ uint8, BAddr []byte, nAddr *NetworkAddr, sig []byte) bool {
 
-	switch req.BTyp {
+	switch typ {
 	case BTECDSA:
-		addr := common.BytesToAddress(req.BlockAddr)
-		return account.VerifyJsonSig(addr, req.Sig, req.NetworkAddr)
+		addr := common.BytesToAddress(BAddr)
+		return account.VerifyJsonSig(addr, sig, nAddr)
 	case BTEd25519:
-		id := account.ID(string(req.BlockAddr))
-		return account.VerifySubSig(id, req.Sig, req.NetworkAddr)
+		id := account.ID(string(BAddr))
+		return account.VerifySubSig(id, sig, nAddr)
 	default:
 		return false
 	}

@@ -12,11 +12,11 @@ type BASTable struct {
 	database *leveldb.DB
 }
 type Record struct {
-	BAddr []byte `json:"ba"`
-
-	BType uint8  `json:"bt"`
-	NType uint8  `json:"nt"`
-	NAddr []byte `json:"na"`
+	BAddr []byte `json:"blockAddr"`
+	Sig   []byte `json:"signature"`
+	BType uint8  `json:"blockType"`
+	NType uint8  `json:"netType"`
+	NAddr []byte `json:"netAddr"`
 }
 
 func InitTable(path string) *BASTable {
@@ -34,7 +34,7 @@ func InitTable(path string) *BASTable {
 	return &BASTable{database: db}
 }
 
-func (book *BASTable) Find(ba *BlockChainAddr) *Record {
+func (book *BASTable) Find(ba *BasQuery) *Record {
 	if has, err := book.database.Has(ba.BlockAddr, nil); !has || err != nil {
 		fmt.Println(err)
 		return nil
@@ -62,6 +62,7 @@ func (book *BASTable) Save(req *RegRequest) error {
 
 	r := &Record{
 		BAddr: req.BlockAddr,
+		Sig:   req.Sig,
 		BType: req.BTyp,
 		NType: req.NTyp,
 		NAddr: req.NetAddr,
