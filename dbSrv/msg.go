@@ -3,16 +3,11 @@ package dbSrv
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/hyperorchid/go-miner-pool/account"
+	"github.com/hyperorchidlab/BAS/crypto"
 	"net"
 )
 
 const (
-	_         = iota
-	BTECDSA   = 1
-	BTEd25519 = 2
-
 	_      = iota
 	NoItem = 1
 	IPV4   = 2
@@ -76,17 +71,11 @@ func NewRegResponse(success bool, eno uint8, msg string) *RegResponse {
 }
 
 func Verify(typ uint8, BAddr []byte, nAddr *NetworkAddr, sig []byte) bool {
-
-	switch typ {
-	case BTECDSA:
-		addr := common.BytesToAddress(BAddr)
-		return account.VerifyJsonSig(addr, sig, nAddr)
-	case BTEd25519:
-		id := account.ID(string(BAddr))
-		return account.VerifySubSig(id, sig, nAddr)
-	default:
+	v, ok := crypto.CurVerifier[typ]
+	if !ok {
 		return false
 	}
+	return v.Verify(BAddr, sig, nAddr)
 }
 
 func (req *RegRequest) String() string {
