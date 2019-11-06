@@ -137,6 +137,10 @@ func queryAction(_ *cobra.Command, _ []string) {
 	var key []byte
 	if param.typ == crypto.BTETH {
 		key = common.HexToAddress(param.addr).Bytes()
+	} else if param.typ == crypto.HOP {
+		key = []byte(param.addr)
+	} else {
+		panic("unknown crypt type!")
 	}
 	req := &dbSrv.BasQuery{
 		BlockAddr: key,
