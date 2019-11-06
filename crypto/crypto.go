@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	_         = iota
-	BTETH     = 1
-	BTEd25519 = 2
+	_     = iota
+	BTETH = 1
+	HOP   = 2
 )
 
 type Verifier interface {
@@ -19,8 +19,8 @@ type Verifier interface {
 }
 
 var CurVerifier = map[uint8]Verifier{
-	BTETH:     &ETHSigner{},
-	BTEd25519: &HOPSigner{},
+	BTETH: &ETHSigner{},
+	HOP:   &HOPSigner{},
 }
 
 type ETHSigner struct {
