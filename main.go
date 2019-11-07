@@ -156,6 +156,11 @@ func queryAction(_ *cobra.Command, _ []string) {
 		panic(err)
 	}
 
+	if res.NTyp == dbSrv.NoItem {
+		fmt.Println("No such bas item")
+		return
+	}
+
 	if !dbSrv.Verify(res.BTyp, key, res.NetworkAddr, res.Sig) {
 		panic("this is a polluted address")
 	}
