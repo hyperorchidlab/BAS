@@ -7,7 +7,6 @@ import (
 	"github.com/btcsuite/goleveldb/leveldb/opt"
 	"github.com/hyperorchid/go-miner-pool/common"
 	"github.com/hyperorchidlab/BAS/dbSrv"
-	"net"
 	"time"
 )
 
@@ -23,14 +22,11 @@ func (bci *basCacheItem) expired() bool {
 }
 
 type cachedClient struct {
-	basAddr  string
+	basIP    string
 	database *leveldb.DB
 }
 
 func NewCachedBasCli(basIP, dbPath string) (BASClient, error) {
-	addr := &net.UDPAddr{IP: net.ParseIP(basIP),
-		Port: dbSrv.BASQueryPort}
-
 	opts := opt.Options{
 		Strict:      opt.DefaultStrict,
 		Compression: opt.NoCompression,
@@ -42,7 +38,7 @@ func NewCachedBasCli(basIP, dbPath string) (BASClient, error) {
 		return nil, err
 	}
 
-	c := &cachedClient{basAddr: addr.String(), database: db}
+	c := &cachedClient{basIP: basIP, database: db}
 	return c, nil
 }
 
@@ -52,7 +48,7 @@ func (c *cachedClient) Query(ba []byte) (*dbSrv.NetworkAddr, error) {
 		return res.NetworkAddr, nil
 	}
 
-	ntAddr, err := QueryBySrvIP(ba, c.basAddr)
+	ntAddr, err := QueryBySrvIP(ba, c.basIP)
 	if err != nil {
 		return nil, err
 	}
@@ -69,5 +65,5 @@ func (c *cachedClient) Query(ba []byte) (*dbSrv.NetworkAddr, error) {
 }
 
 func (c *cachedClient) Register(req *dbSrv.RegRequest) error {
-	return RegisterBySrvIP(req, c.basAddr)
+	return RegisterBySrvIP(req, c.basIP)
 }

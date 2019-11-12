@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hyperorchid/go-miner-pool/network"
 	"github.com/hyperorchidlab/BAS/dbSrv"
+	"net"
 	"time"
 )
 
@@ -12,8 +13,10 @@ type BASClient interface {
 	Register(*dbSrv.RegRequest) error
 }
 
-func RegisterBySrvIP(req *dbSrv.RegRequest, srvAddr string) error {
-	conn, err := network.DialJson("tcp", srvAddr)
+func RegisterBySrvIP(req *dbSrv.RegRequest, ip string) error {
+	addr := &net.UDPAddr{IP: net.ParseIP(ip),
+		Port: dbSrv.BASQueryPort}
+	conn, err := network.DialJson("tcp", addr.String())
 	if err != nil {
 		return err
 	}
@@ -34,8 +37,12 @@ func RegisterBySrvIP(req *dbSrv.RegRequest, srvAddr string) error {
 	return fmt.Errorf("reg failed because errno:[%d] msg:[%s]", res.ENO, res.MSG)
 }
 
-func QueryBySrvIP(ba []byte, srvAddr string) (*dbSrv.NetworkAddr, error) {
-	conn, err := network.DialJson("udp", srvAddr)
+func QueryBySrvIP(ba []byte, ip string) (*dbSrv.NetworkAddr, error) {
+
+	addr := &net.UDPAddr{IP: net.ParseIP(ip),
+		Port: dbSrv.BASQueryPort}
+	conn, err := network.DialJson("udp", addr.String())
+
 	if err != nil {
 		return nil, err
 	}
