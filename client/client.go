@@ -14,8 +14,8 @@ type BASClient interface {
 }
 
 func RegisterBySrvIP(req *dbSrv.RegRequest, ip string) error {
-	addr := &net.UDPAddr{IP: net.ParseIP(ip),
-		Port: dbSrv.BASQueryPort}
+	addr := &net.TCPAddr{IP: net.ParseIP(ip),
+		Port: dbSrv.BASRegPort}
 	conn, err := network.DialJson("tcp", addr.String())
 	if err != nil {
 		return err
