@@ -67,3 +67,10 @@ func (c *cachedClient) Query(ba []byte) (*dbSrv.NetworkAddr, error) {
 func (c *cachedClient) Register(req *dbSrv.RegRequest) error {
 	return RegisterBySrvIP(req, c.basIP)
 }
+
+func (c *cachedClient) String() string {
+	return fmt.Sprintf("\n----------BAS Cached Client----------"+
+		"->BAS IP:%s\n"+
+		"\n-------------------",
+		c.basIP)
+}

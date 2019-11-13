@@ -1,6 +1,7 @@
 package basc
 
 import (
+	"fmt"
 	"github.com/hyperorchidlab/BAS/dbSrv"
 )
 
@@ -19,4 +20,11 @@ func (c *client) Query(ba []byte) (*dbSrv.NetworkAddr, error) {
 
 func (c *client) Register(req *dbSrv.RegRequest) error {
 	return RegisterBySrvIP(req, c.basIP)
+}
+
+func (c *client) String() string {
+	return fmt.Sprintf("\n----------Bas Simple client----------"+
+		"\n->BAS IP:%s"+
+		"\n-------------------",
+		c.basIP)
 }

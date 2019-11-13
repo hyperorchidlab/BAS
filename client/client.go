@@ -11,6 +11,7 @@ import (
 type BASClient interface {
 	Query([]byte) (*dbSrv.NetworkAddr, error)
 	Register(*dbSrv.RegRequest) error
+	String() string
 }
 
 func RegisterBySrvIP(req *dbSrv.RegRequest, ip string) error {
@@ -42,10 +43,10 @@ func QueryBySrvIP(ba []byte, ip string) (*dbSrv.NetworkAddr, error) {
 	addr := &net.UDPAddr{IP: net.ParseIP(ip),
 		Port: dbSrv.BASQueryPort}
 	conn, err := network.DialJson("udp", addr.String())
-
 	if err != nil {
 		return nil, err
 	}
+
 	defer conn.Close()
 
 	req := &dbSrv.BasQuery{
