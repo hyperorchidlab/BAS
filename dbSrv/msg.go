@@ -34,11 +34,11 @@ type NetworkAddr struct {
 }
 
 func (na *NetworkAddr) String() string {
-	return fmt.Sprintf("\n------------------"+
-		"\n network type:%d [1:invalid, 2:IPV4, 3:IPV6]"+
-		"\n blockChain type:%d [1:ETH, 2:HOP]"+
-		"\n network address:%s"+
-		"\n------------------\n",
+	return fmt.Sprintf("\n----------------------------------------------"+
+		"\n network type:\t%d [1:invalid, 2:IPV4, 3:IPV6]"+
+		"\n blockChain type:\t%d [1:ETH, 2:HOP]"+
+		"\n network address:\t%s"+
+		"\n----------------------------------------------",
 		na.NTyp,
 		na.BTyp,
 		string(na.NetAddr))

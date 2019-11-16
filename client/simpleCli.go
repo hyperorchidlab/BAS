@@ -25,6 +25,6 @@ func (c *client) Register(req *dbSrv.RegRequest) error {
 func (c *client) String() string {
 	return fmt.Sprintf("\n----------Bas Simple client----------"+
 		"\n->BAS IP:%s"+
-		"\n-------------------",
+		"\n---------------------------------------",
 		c.basIP)
 }
