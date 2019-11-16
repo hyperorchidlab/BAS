@@ -38,7 +38,7 @@ func (na *NetworkAddr) String() string {
 		"\n network type:\t%d [1:invalid, 2:IPV4, 3:IPV6]"+
 		"\n blockChain type:\t%d [1:ETH, 2:HOP]"+
 		"\n network address:\t%s"+
-		"\n----------------------------------------------",
+		"\n ----------------------------------------------",
 		na.NTyp,
 		na.BTyp,
 		string(na.NetAddr))
@@ -79,11 +79,12 @@ func Verify(typ uint8, BAddr []byte, nAddr *NetworkAddr, sig []byte) bool {
 }
 
 func (req *RegRequest) String() string {
-	return fmt.Sprintf("*********************"+
+	return fmt.Sprintf("***********[Bas Register Reuest]**********"+
 		"\n*BlockChainType:\t%d"+
 		"\n*NetworkType:\t%d"+
 		"\n*NetworkAddr:\t%s"+
-		"\n*********************\n", req.BTyp, req.NTyp, req.NetAddr)
+		"\n************************************",
+		req.BTyp, req.NTyp, req.NetAddr)
 }
 
 func CheckIPType(ip string) (uint8, error) {
