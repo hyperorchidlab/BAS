@@ -64,7 +64,7 @@ func QueryBySrvIP(ba []byte, ip string) (*dbSrv.NetworkAddr, error) {
 	}
 
 	if res.NTyp == dbSrv.NoItem {
-		return nil, fmt.Errorf("no BAS item for:%s", string(ba))
+		return nil, fmt.Errorf("no BAS item for:%s", ba)
 	}
 
 	if !dbSrv.Verify(res.BTyp, ba, res.NetworkAddr, res.Sig) {
