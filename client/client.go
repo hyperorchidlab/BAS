@@ -62,8 +62,13 @@ func QueryBySrvIP(ba []byte, ip string) (*dbSrv.NetworkAddr, error) {
 	if err := conn.ReadJsonMsg(res); err != nil {
 		return nil, err
 	}
+
+	if res.NTyp == dbSrv.NoItem {
+		return nil, fmt.Errorf("no BAS item for:%s", string(ba))
+	}
+
 	if !dbSrv.Verify(res.BTyp, ba, res.NetworkAddr, res.Sig) {
-		return nil, fmt.Errorf("this is a polluted address")
+		return nil, fmt.Errorf("this is a polluted address:\n%s", res.String())
 	}
 	return res.NetworkAddr, nil
 }
