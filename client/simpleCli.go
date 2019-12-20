@@ -2,7 +2,9 @@ package basc
 
 import (
 	"fmt"
+	"github.com/hyperorchid/go-miner-pool/network"
 	"github.com/hyperorchidlab/BAS/dbSrv"
+	"net"
 )
 
 type client struct {
@@ -18,6 +20,10 @@ func (c *client) Query(ba []byte) (*dbSrv.NetworkAddr, error) {
 	return QueryBySrvIP(ba, c.basIP)
 }
 
+func (c *client) QueryByConn(conn *network.JsonConn, ba []byte) (*dbSrv.NetworkAddr, error) {
+	return QueryByConn(conn, ba)
+}
+
 func (c *client) Register(req *dbSrv.RegRequest) error {
 	return RegisterBySrvIP(req, c.basIP)
 }
@@ -27,4 +33,10 @@ func (c *client) String() string {
 		"\n->BAS IP:%s"+
 		"\n---------------------------------------",
 		c.basIP)
+}
+
+func (c *client) BaseAddr() string {
+	addr := &net.UDPAddr{IP: net.ParseIP(c.basIP),
+		Port: dbSrv.BASQueryPort}
+	return addr.String()
 }

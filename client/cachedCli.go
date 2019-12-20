@@ -6,7 +6,9 @@ import (
 	"github.com/btcsuite/goleveldb/leveldb/filter"
 	"github.com/btcsuite/goleveldb/leveldb/opt"
 	"github.com/hyperorchid/go-miner-pool/common"
+	"github.com/hyperorchid/go-miner-pool/network"
 	"github.com/hyperorchidlab/BAS/dbSrv"
+	"net"
 	"time"
 )
 
@@ -64,6 +66,28 @@ func (c *cachedClient) Query(ba []byte) (*dbSrv.NetworkAddr, error) {
 	return ntAddr, nil
 }
 
+func (c *cachedClient) QueryByConn(conn *network.JsonConn, ba []byte) (*dbSrv.NetworkAddr, error) {
+	res := &basCacheItem{}
+	if err := common.GetJsonObj(c.database, ba, res); err == nil && !res.expired() {
+		return res.NetworkAddr, nil
+	}
+
+	ntAddr, err := QueryByConn(conn, ba)
+	if err != nil {
+		return nil, err
+	}
+	if ntAddr.NTyp == dbSrv.NoItem {
+		return nil, fmt.Errorf("no such block chain address's[%s] ip address", ba)
+	}
+
+	res = &basCacheItem{
+		When:        time.Now().Add(SimpleBasCacheTime),
+		NetworkAddr: ntAddr,
+	}
+	_ = common.SaveJsonObj(c.database, ba, res)
+	return ntAddr, nil
+}
+
 func (c *cachedClient) Register(req *dbSrv.RegRequest) error {
 	return RegisterBySrvIP(req, c.basIP)
 }
@@ -73,4 +97,10 @@ func (c *cachedClient) String() string {
 		"->BAS IP:%s\n"+
 		"\n-------------------",
 		c.basIP)
+}
+
+func (c *cachedClient) BaseAddr() string {
+	addr := &net.UDPAddr{IP: net.ParseIP(c.basIP),
+		Port: dbSrv.BASQueryPort}
+	return addr.String()
 }
