@@ -72,7 +72,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&Conf.DBPath, "database", "b", defaultDB, "BAS -b [DATA BASE DIR]")
 	Conf.PidPath = defaultPid
 
-	queryCmd.Flags().StringVarP(&param.basIP, "basip", "b", "167.179.112.108", "BAS query -b [BAS IP ADDRESS]")
+	queryCmd.Flags().StringVarP(&param.basIP, "basip", "b", "108.61.223.99", "BAS query -b [BAS IP ADDRESS]")
 	queryCmd.Flags().StringVarP(&param.addr, "address", "a", "", "BAS query -a [BLOCK CHAIN ADDRESS]")
 	queryCmd.Flags().Uint8VarP(&param.typ, "netType", "t", 0, "BAS query -t [1:ETH, 2:HOP]")
 
