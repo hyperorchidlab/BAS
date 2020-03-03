@@ -32,5 +32,8 @@ build:
 mac:
 	GOOS=darwin go build -ldflags '-w -s' -o $(BINDIR)/$(NAME)
 
+ios:
+	gomobile bind -v -o $(BINDIR)/bas.framework -target=ios github.com/hyperorchidlab/BAS/ios
+
 clean:
 	rm $(BINDIR)/$(NAME)
