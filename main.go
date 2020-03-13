@@ -151,7 +151,7 @@ func queryAction(_ *cobra.Command, _ []string) {
 	}
 
 	res := &dbSrv.BasAnswer{}
-	_ = conn.SetReadDeadline(time.Now().Add(time.Second * 3))
+	_ = conn.SetReadDeadline(time.Now().Add(time.Second * 6))
 	if err := jConn.ReadJsonMsg(res); err != nil {
 		panic(err)
 	}
