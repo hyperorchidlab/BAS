@@ -14,8 +14,8 @@ const (
 	IPV6   = 3
 
 	BufSize      = 1024
-	BASQueryPort = 53
-	BASRegPort   = 54
+	BASQueryPort = 8853
+	BASRegPort   = 8854
 )
 
 type BasQuery struct {

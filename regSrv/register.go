@@ -14,7 +14,7 @@ type Register struct {
 }
 
 func NewReg(db *dbSrv.BASTable) *Register {
-	srv, err := net.ListenTCP("tcp", &net.TCPAddr{Port: dbSrv.BASRegPort})
+	srv, err := net.ListenTCP("tcp4", &net.TCPAddr{Port: dbSrv.BASRegPort})
 	if err != nil {
 		panic(err)
 	}
