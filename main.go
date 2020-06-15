@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/hyperorchid/go-miner-pool/network"
 	"github.com/hyperorchidlab/BAS/crypto"
 	"github.com/hyperorchidlab/BAS/dbSrv"
 	"github.com/hyperorchidlab/BAS/querySrv"
 	"github.com/hyperorchidlab/BAS/regSrv"
+	"github.com/hyperorchidlab/go-miner-pool/network"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"net"

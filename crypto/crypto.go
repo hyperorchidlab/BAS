@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/hyperorchid/go-miner-pool/account"
+	"github.com/hyperorchidlab/go-miner-pool/account"
 )
 
 const (
