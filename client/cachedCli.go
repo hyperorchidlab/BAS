@@ -15,6 +15,7 @@ import (
 const SimpleBasCacheTime = time.Hour
 
 type basCacheItem struct {
+	ExtData string
 	*dbSrv.NetworkAddr
 	When time.Time `json:"expire"`
 }
@@ -45,48 +46,63 @@ func NewCachedBasCli(basIP, dbPath string) (BASClient, error) {
 }
 
 func (c *cachedClient) Query(ba []byte) (*dbSrv.NetworkAddr, error) {
+	_,naddr,err:= c.QueryExtend(ba)
+	return naddr,err
+}
+
+func (c *cachedClient)QueryExtend(ba []byte) (extData string, naddr *dbSrv.NetworkAddr,err error)  {
 	res := &basCacheItem{}
 	if err := common.GetJsonObj(c.database, ba, res); err == nil && !res.expired() {
-		return res.NetworkAddr, nil
+		return res.ExtData,res.NetworkAddr, nil
 	}
 
-	ntAddr, err := QueryBySrvIP(ba, c.basIP)
+	extdata, ntAddr, err := QueryExtendBySrvIP(ba, c.basIP)
 	if err != nil {
-		return nil, err
+		return "",nil, err
 	}
 	if ntAddr.NTyp == dbSrv.NoItem {
-		return nil, fmt.Errorf("no such block chain address's[%s] ip address", ba)
+		return "",nil, fmt.Errorf("no such block chain address's[%s] ip address", ba)
 	}
 
 	res = &basCacheItem{
+		ExtData: extdata,
 		When:        time.Now().Add(SimpleBasCacheTime),
 		NetworkAddr: ntAddr,
 	}
 	_ = common.SaveJsonObj(c.database, ba, res)
-	return ntAddr, nil
+	return extdata,ntAddr, nil
 }
 
 func (c *cachedClient) QueryByConn(conn *network.JsonConn, ba []byte) (*dbSrv.NetworkAddr, error) {
+	_,naddr,err:=c.QueryExtendByConn(conn,ba)
+
+	return naddr,err
+}
+
+func (c *cachedClient)QueryExtendByConn(conn *network.JsonConn,ba []byte) (extData string, naddr *dbSrv.NetworkAddr,err error)  {
 	res := &basCacheItem{}
 	if err := common.GetJsonObj(c.database, ba, res); err == nil && !res.expired() {
-		return res.NetworkAddr, nil
+		return res.ExtData,res.NetworkAddr, nil
 	}
 
-	ntAddr, err := QueryByConn(conn, ba)
+	extdata,ntAddr, err := QueryExtendByConn(conn, ba)
 	if err != nil {
-		return nil, err
+		return "",nil, err
 	}
 	if ntAddr.NTyp == dbSrv.NoItem {
-		return nil, fmt.Errorf("no such block chain address's[%s] ip address", ba)
+		return "",nil, fmt.Errorf("no such block chain address's[%s] ip address", ba)
 	}
 
 	res = &basCacheItem{
+		ExtData: extdata,
 		When:        time.Now().Add(SimpleBasCacheTime),
 		NetworkAddr: ntAddr,
 	}
 	_ = common.SaveJsonObj(c.database, ba, res)
-	return ntAddr, nil
+	return res.ExtData,ntAddr, nil
 }
+
+
 
 func (c *cachedClient) Register(req *dbSrv.RegRequest) error {
 	return RegisterBySrvIP(req, c.basIP)

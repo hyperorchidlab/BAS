@@ -24,7 +24,13 @@ type BasQuery struct {
 
 type BasAnswer struct {
 	Sig []byte `json:"signature"`
+	SignData
+}
+
+
+type SignData struct {
 	*NetworkAddr
+	ExtData string `json:"ext_data,omitempty"`
 }
 
 type NetworkAddr struct {
@@ -42,7 +48,22 @@ func (na *NetworkAddr) String() string {
 		na.NTyp,
 		na.BTyp,
 		string(na.NetAddr))
+
 }
+
+func (sd *SignData)String() string  {
+	return fmt.Sprintf("\n----------------------------------------------"+
+		"\n network type:\t%d [1:invalid, 2:IPV4, 3:IPV6]"+
+		"\n blockChain type:\t%d [1:ETH, 2:HOP]"+
+		"\n network address:\t%s"+
+		"\n extend data:\t%s"+
+		"\n ----------------------------------------------",
+		sd.NTyp,
+		sd.BTyp,
+		string(sd.NetAddr),
+		sd.ExtData)
+}
+
 
 var Empty = &NetworkAddr{
 	NTyp: NoItem,
@@ -53,7 +74,7 @@ var EmptyData, _ = json.Marshal(Empty)
 type RegRequest struct {
 	Sig          []byte `json:"sig"`
 	BlockAddr    []byte `json:"blockChainAddr"`
-	*NetworkAddr `json:"data"`
+	SignData
 }
 
 type RegResponse struct {
@@ -70,12 +91,13 @@ func NewRegResponse(success bool, eno uint8, msg string) *RegResponse {
 	}
 }
 
-func Verify(typ uint8, BAddr []byte, nAddr *NetworkAddr, sig []byte) bool {
+func Verify(typ uint8, BAddr []byte, signData *SignData,sig []byte) bool {
 	v, ok := crypto.CurVerifier[typ]
 	if !ok {
 		return false
 	}
-	return v.Verify(BAddr, sig, nAddr)
+
+	return v.Verify(BAddr, sig, *signData)
 }
 
 func (req *RegRequest) String() string {
@@ -83,8 +105,9 @@ func (req *RegRequest) String() string {
 		"\n*BlockChainType:\t%d"+
 		"\n*NetworkType:\t%d"+
 		"\n*NetworkAddr:\t%s"+
+		"\n*Extend Data:\t%s"+
 		"\n************************************",
-		req.BTyp, req.NTyp, req.NetAddr)
+		req.BTyp, req.NTyp, req.NetAddr,req.ExtData)
 }
 
 func CheckIPType(ip string) (uint8, error) {

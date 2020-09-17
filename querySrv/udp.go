@@ -60,13 +60,15 @@ func (tb *UDPBAS) answer(data []byte, from *net.UDPAddr) {
 		return
 	}
 	fmt.Println(string(record.NAddr))
-	resData, _ = json.Marshal(&dbSrv.BasAnswer{
-		Sig: record.Sig,
-		NetworkAddr: &dbSrv.NetworkAddr{
-			BTyp:    record.BType,
-			NTyp:    record.NType,
-			NetAddr: record.NAddr,
-		},
-	})
+
+	answer:=&dbSrv.BasAnswer{}
+	answer.ExtData = record.ExtData
+	answer.Sig = record.Sig
+	answer.SignData.NetworkAddr = &dbSrv.NetworkAddr{
+				BTyp:    record.BType,
+				NTyp:    record.NType,
+				NetAddr: record.NAddr,
+			}
+	resData,_=json.Marshal(*answer)
 	_, _ = tb.srv.WriteToUDP(resData, from)
 }

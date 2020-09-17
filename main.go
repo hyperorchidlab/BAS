@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-const Version = "0.1"
+const Version = "0.2"
 
 var param struct {
 	addr  string
@@ -161,9 +161,9 @@ func queryAction(_ *cobra.Command, _ []string) {
 		return
 	}
 
-	if !dbSrv.Verify(res.BTyp, key, res.NetworkAddr, res.Sig) {
+	if !dbSrv.Verify(res.BTyp, key, &res.SignData, res.Sig) {
 		panic("this is a polluted address")
 	}
 
-	fmt.Println(res.NetworkAddr.String())
+	fmt.Println(res.SignData.String())
 }

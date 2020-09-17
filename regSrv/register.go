@@ -37,7 +37,7 @@ func (r *Register) Serve(done chan bool) {
 		}
 
 		common.NewThread(func(sig chan struct{}) {
-			r.Register(&network.JsonConn{Conn: conn})
+			r.Register(&network.JsonConn{Conn: &network.LVConn{Conn:conn}})
 		}, func(err interface{}) {
 			conn.Close()
 		}).Start()
@@ -52,7 +52,7 @@ func (r *Register) Register(jsonCon *network.JsonConn) {
 		return
 	}
 
-	if !dbSrv.Verify(req.BTyp, req.BlockAddr, req.NetworkAddr, req.Sig) {
+	if !dbSrv.Verify(req.BTyp, req.BlockAddr, &req.SignData, req.Sig) {
 		fmt.Println("verify failed->:", req.String())
 		_ = jsonCon.WriteJsonMsg(dbSrv.NewRegResponse(false, 1, "verify failed"))
 		return

@@ -17,6 +17,7 @@ type Record struct {
 	BType uint8  `json:"blockType"`
 	NType uint8  `json:"netType"`
 	NAddr []byte `json:"netAddr"`
+	ExtData string `json:"ext_data"`
 }
 
 func InitTable(path string) *BASTable {
@@ -66,6 +67,7 @@ func (book *BASTable) Save(req *RegRequest) error {
 		BType: req.BTyp,
 		NType: req.NTyp,
 		NAddr: req.NetAddr,
+		ExtData: req.ExtData,
 	}
 	b, e := json.Marshal(r)
 	if e != nil {
