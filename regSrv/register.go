@@ -2,9 +2,9 @@ package regSrv
 
 import (
 	"fmt"
+	"github.com/hyperorchidlab/BAS/dbSrv"
 	"github.com/hyperorchidlab/go-miner-pool/common"
 	"github.com/hyperorchidlab/go-miner-pool/network"
-	"github.com/hyperorchidlab/BAS/dbSrv"
 	"net"
 )
 
