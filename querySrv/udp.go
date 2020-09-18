@@ -3,7 +3,7 @@ package querySrv
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hyperorchid/go-miner-pool/common"
+	"github.com/hyperorchidlab/go-miner-pool/common"
 	"github.com/hyperorchidlab/BAS/dbSrv"
 	"net"
 )
