@@ -30,7 +30,13 @@ build:
 	GOOS=$(OS) GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)
 
 mac:
-	GOOS=darwin go build -ldflags '-w -s' -o $(BINDIR)/$(NAME)
+	GOOS=darwin go build -ldflags '-w -s' -o $(BINDIR)/$(NAME).mac
+arm:
+	GOOS=linux GOARM=7 GOARCH=arm go build -ldflags '-w -s' -o $(BINDIR)/$(NAME).arm
+linux:
+	GOOS=linux GOARCH=amd64 go build -ldflags '-w -s' -o $(BINDIR)/$(NAME).lnx
+win:
+	GOOS=windows GOARCH=amd64 go build -ldflags '-w -s' -o $(BINDIR)/$(NAME).exe
 
 ios:
 	gomobile bind -v -o $(BINDIR)/bas.framework -target=ios github.com/hyperorchidlab/BAS/ios
