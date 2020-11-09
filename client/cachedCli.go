@@ -50,6 +50,11 @@ func (c *cachedClient) Query(ba []byte) (*dbSrv.NetworkAddr, error) {
 	return naddr,err
 }
 
+func NewCacheBasCli2(basip string,db *leveldb.DB)  BASClient{
+	return &cachedClient{basIP: basip,database: db}
+}
+
+
 func (c *cachedClient)QueryExtend(ba []byte) (extData string, naddr *dbSrv.NetworkAddr,err error)  {
 	res := &basCacheItem{}
 	if err := common.GetJsonObj(c.database, ba, res); err == nil && !res.expired() {
