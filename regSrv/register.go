@@ -37,7 +37,7 @@ func (r *Register) Serve(done chan bool) {
 		}
 
 		common.NewThread(func(sig chan struct{}) {
-			r.Register(&network.JsonConn{Conn: &network.LVConn{Conn:conn}})
+			r.Register(&network.JsonConn{Conn: &network.LVConn{Conn: conn}})
 		}, func(err interface{}) {
 			conn.Close()
 		}).Start()

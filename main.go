@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-const Version = "0.2"
+const Version = "1.0"
 
 var param struct {
 	addr  string
@@ -72,7 +72,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&Conf.DBPath, "database", "b", defaultDB, "BAS -b [DATA BASE DIR]")
 	Conf.PidPath = defaultPid
 
-	queryCmd.Flags().StringVarP(&param.basIP, "basip", "b", "108.61.223.99", "BAS query -b [BAS IP ADDRESS]")
+	queryCmd.Flags().StringVarP(&param.basIP, "basip", "b", "", "BAS query -b [BAS IP ADDRESS]")
 	queryCmd.Flags().StringVarP(&param.addr, "address", "a", "", "BAS query -a [BLOCK CHAIN ADDRESS]")
 	queryCmd.Flags().Uint8VarP(&param.typ, "netType", "t", 0, "BAS query -t [1:ETH, 2:HOP]")
 
@@ -125,19 +125,42 @@ func waitSignal(done chan bool) {
 }
 
 func queryAction(_ *cobra.Command, _ []string) {
+
+	ip := param.basIP
+	if ip == "" {
+		ip = "127.0.0.1"
+	}
+
 	conn, err := net.DialUDP("udp", nil,
-		&net.UDPAddr{IP: net.ParseIP(param.basIP),
+		&net.UDPAddr{IP: net.ParseIP(ip),
 			Port: dbSrv.BASQueryPort})
 	if err != nil {
 		panic(err)
 	}
 
+	if param.addr == "" {
+		fmt.Println("please input address")
+		return
+	}
+
 	jConn := &network.JsonConn{Conn: conn}
 
 	var key []byte
-	if param.typ == crypto.BTETH {
+
+	typ := param.typ
+	if typ == 0 {
+		//guess type
+		if param.addr[0:2] == "HO" {
+			typ = crypto.HOP
+		}
+
+		if param.addr[0:2] == "0x" {
+			typ = crypto.BTETH
+		}
+	}
+	if typ == crypto.BTETH {
 		key = common.HexToAddress(param.addr).Bytes()
-	} else if param.typ == crypto.HOP {
+	} else if typ == crypto.HOP {
 		key = []byte(param.addr)
 	} else {
 		panic("unknown crypt type!")

@@ -12,11 +12,11 @@ type BASTable struct {
 	database *leveldb.DB
 }
 type Record struct {
-	BAddr []byte `json:"blockAddr"`
-	Sig   []byte `json:"signature"`
-	BType uint8  `json:"blockType"`
-	NType uint8  `json:"netType"`
-	NAddr []byte `json:"netAddr"`
+	BAddr   []byte `json:"blockAddr"`
+	Sig     []byte `json:"signature"`
+	BType   uint8  `json:"blockType"`
+	NType   uint8  `json:"netType"`
+	NAddr   []byte `json:"netAddr"`
 	ExtData string `json:"ext_data"`
 }
 
@@ -62,11 +62,11 @@ func (book *BASTable) Save(req *RegRequest) error {
 	}
 
 	r := &Record{
-		BAddr: req.BlockAddr,
-		Sig:   req.Sig,
-		BType: req.BTyp,
-		NType: req.NTyp,
-		NAddr: req.NetAddr,
+		BAddr:   req.BlockAddr,
+		Sig:     req.Sig,
+		BType:   req.BTyp,
+		NType:   req.NTyp,
+		NAddr:   req.NetAddr,
 		ExtData: req.ExtData,
 	}
 	b, e := json.Marshal(r)
