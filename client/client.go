@@ -3,8 +3,11 @@ package basc
 import (
 	"fmt"
 	"github.com/hyperorchidlab/BAS/dbSrv"
+	"github.com/hyperorchidlab/go-miner-pool/common"
 	"github.com/hyperorchidlab/go-miner-pool/network"
 	"net"
+	"strconv"
+	"syscall"
 	"time"
 )
 
@@ -54,6 +57,10 @@ func QueryExtendBySrvIP(ba []byte, ip string) (extData string, naddr *dbSrv.Netw
 
 	defer conn.Close()
 
+	return queryExtendBySrvIP(conn, ba)
+}
+
+func queryExtendBySrvIP(conn *network.JsonConn, ba []byte) (extData string, naddr *dbSrv.NetworkAddr, err error) {
 	req := &dbSrv.BasQuery{
 		BlockAddr: ba,
 	}
@@ -78,8 +85,37 @@ func QueryExtendBySrvIP(ba []byte, ip string) (extData string, naddr *dbSrv.Netw
 	return res.ExtData, res.NetworkAddr, nil
 }
 
+func QueryExtendBySrvIP2(ba []byte, ip string, saver common.ConnSaver, timeout time.Duration) (extData string, naddr *dbSrv.NetworkAddr, err error) {
+	d := &net.Dialer{
+		Timeout: timeout,
+		Control: func(network, address string, c syscall.RawConn) error {
+			if saver != nil {
+				return c.Control(saver)
+			}
+			return nil
+		},
+	}
+
+	addr := ip + ":" + strconv.Itoa(dbSrv.BASQueryPort)
+
+	conn, err := d.Dial("udp", addr)
+	if err != nil {
+		return "", nil, err
+	}
+	jconn := &network.JsonConn{conn}
+
+	defer jconn.Close()
+
+	return queryExtendBySrvIP(jconn, ba)
+}
+
 func QueryBySrvIP(ba []byte, ip string) (*dbSrv.NetworkAddr, error) {
 	_, nddr, err := QueryExtendBySrvIP(ba, ip)
+	return nddr, err
+}
+
+func QueryBySrvIP2(ba []byte, ip string, timeout time.Duration, saver common.ConnSaver) (*dbSrv.NetworkAddr, error) {
+	_, nddr, err := QueryExtendBySrvIP2(ba, ip, saver, timeout)
 	return nddr, err
 }
 

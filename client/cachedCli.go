@@ -27,6 +27,8 @@ func (bci *basCacheItem) expired() bool {
 type cachedClient struct {
 	basIP    string
 	database *leveldb.DB
+	saver    common.ConnSaver
+	timeout  time.Duration
 }
 
 func NewCachedBasCli(basIP, dbPath string) (BASClient, error) {
@@ -50,8 +52,8 @@ func (c *cachedClient) Query(ba []byte) (*dbSrv.NetworkAddr, error) {
 	return naddr, err
 }
 
-func NewCacheBasCli2(basip string, db *leveldb.DB) BASClient {
-	return &cachedClient{basIP: basip, database: db}
+func NewCacheBasCli2(basip string, db *leveldb.DB, saver common.ConnSaver, timeout time.Duration) BASClient {
+	return &cachedClient{basIP: basip, database: db, saver: saver, timeout: timeout}
 }
 
 func (c *cachedClient) QueryExtend(ba []byte) (extData string, naddr *dbSrv.NetworkAddr, err error) {
@@ -60,7 +62,17 @@ func (c *cachedClient) QueryExtend(ba []byte) (extData string, naddr *dbSrv.Netw
 		return res.ExtData, res.NetworkAddr, nil
 	}
 
-	extdata, ntAddr, err := QueryExtendBySrvIP(ba, c.basIP)
+	var (
+		extdata string
+		ntAddr  *dbSrv.NetworkAddr
+	)
+
+	if c.saver != nil {
+		extdata, ntAddr, err = QueryExtendBySrvIP2(ba, c.basIP, c.saver, c.timeout)
+	} else {
+		extdata, ntAddr, err = QueryExtendBySrvIP(ba, c.basIP)
+	}
+
 	if err != nil {
 		return "", nil, err
 	}
