@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-const Version = "1.0"
+const Version = "1.0.0_gr"
 
 var param struct {
 	addr  string
