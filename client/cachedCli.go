@@ -9,6 +9,7 @@ import (
 	"github.com/hyperorchidlab/go-miner-pool/common"
 	"github.com/hyperorchidlab/go-miner-pool/network"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -26,6 +27,7 @@ func (bci *basCacheItem) expired() bool {
 
 type cachedClient struct {
 	basIP    string
+	dblock   sync.RWMutex
 	database *leveldb.DB
 	saver    common.ConnSaver
 	timeout  time.Duration
@@ -58,9 +60,12 @@ func NewCacheBasCli2(basip string, db *leveldb.DB, saver common.ConnSaver, timeo
 
 func (c *cachedClient) QueryExtend(ba []byte) (extData string, naddr *dbSrv.NetworkAddr, err error) {
 	res := &basCacheItem{}
+	c.dblock.RLock()
 	if err := common.GetJsonObj(c.database, ba, res); err == nil && !res.expired() {
+		c.dblock.RUnlock()
 		return res.ExtData, res.NetworkAddr, nil
 	}
+	c.dblock.RUnlock()
 
 	var (
 		extdata string
@@ -85,7 +90,9 @@ func (c *cachedClient) QueryExtend(ba []byte) (extData string, naddr *dbSrv.Netw
 		When:        time.Now().Add(SimpleBasCacheTime),
 		NetworkAddr: ntAddr,
 	}
+	c.dblock.Lock()
 	_ = common.SaveJsonObj(c.database, ba, res)
+	c.dblock.Unlock()
 	return extdata, ntAddr, nil
 }
 
@@ -97,9 +104,12 @@ func (c *cachedClient) QueryByConn(conn *network.JsonConn, ba []byte) (*dbSrv.Ne
 
 func (c *cachedClient) QueryExtendByConn(conn *network.JsonConn, ba []byte) (extData string, naddr *dbSrv.NetworkAddr, err error) {
 	res := &basCacheItem{}
+	c.dblock.RLock()
 	if err := common.GetJsonObj(c.database, ba, res); err == nil && !res.expired() {
+		c.dblock.RUnlock()
 		return res.ExtData, res.NetworkAddr, nil
 	}
+	c.dblock.RUnlock()
 
 	extdata, ntAddr, err := QueryExtendByConn(conn, ba)
 	if err != nil {
@@ -114,7 +124,9 @@ func (c *cachedClient) QueryExtendByConn(conn *network.JsonConn, ba []byte) (ext
 		When:        time.Now().Add(SimpleBasCacheTime),
 		NetworkAddr: ntAddr,
 	}
+	c.dblock.Lock()
 	_ = common.SaveJsonObj(c.database, ba, res)
+	c.dblock.Unlock()
 	return res.ExtData, ntAddr, nil
 }
 
