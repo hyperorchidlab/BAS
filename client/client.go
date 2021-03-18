@@ -52,7 +52,7 @@ func QueryExtendBySrvIP(ba []byte, ip string) (extData string, naddr *dbSrv.Netw
 		Port: dbSrv.BASQueryPort}
 	conn, err := network.DialJson("udp", addr.String())
 	if err != nil {
-		return "", nil, err
+		return "", nil, NewError(err.Error(),NetWorkErr)
 	}
 
 	defer conn.Close()
@@ -66,21 +66,22 @@ func queryExtendBySrvIP(conn *network.JsonConn, ba []byte) (extData string, nadd
 	}
 
 	if err := conn.WriteJsonMsg(req); err != nil {
-		return "", nil, err
+		return "", nil, NewError(err.Error(),NetWorkErr)
 	}
 
 	res := &dbSrv.BasAnswer{}
 	_ = conn.SetReadDeadline(time.Now().Add(time.Second * 3))
 	if err := conn.ReadJsonMsg(res); err != nil {
-		return "", nil, err
+		return "", nil, NewError(err.Error(),NetWorkErr)
 	}
 
 	if res.NTyp == dbSrv.NoItem {
-		return "", nil, fmt.Errorf("no such BAS item")
+		return "", nil, NewError("no such BAS item",NoItemErr)
 	}
 
 	if !dbSrv.Verify(res.BTyp, ba, &res.SignData, res.Sig) {
-		return "", nil, fmt.Errorf("this is a polluted address:\n%s", res.String())
+		msg:=fmt.Sprintf("this is a polluted address:\n%s", res.String())
+		return "", nil, NewError(msg,ItemPolluted)
 	}
 	return res.ExtData, res.NetworkAddr, nil
 }
@@ -100,7 +101,7 @@ func QueryExtendBySrvIP2(ba []byte, ip string, saver common.ConnSaver, timeout t
 
 	conn, err := d.Dial("udp", addr)
 	if err != nil {
-		return "", nil, err
+		return "", nil, NewError(err.Error(),NetWorkErr)
 	}
 	jconn := &network.JsonConn{conn}
 

@@ -81,9 +81,9 @@ func (c *cachedClient) QueryExtend(ba []byte) (extData string, naddr *dbSrv.Netw
 	if err != nil {
 		return "", nil, err
 	}
-	if ntAddr.NTyp == dbSrv.NoItem {
-		return "", nil, fmt.Errorf("no such block chain address's[%s] ip address", ba)
-	}
+	//if ntAddr.NTyp == dbSrv.NoItem {
+	//	return "", nil, fmt.Errorf("no such block chain address's[%s] ip address", ba)
+	//}
 
 	res = &basCacheItem{
 		ExtData:     extdata,
