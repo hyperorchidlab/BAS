@@ -6,9 +6,12 @@ import (
 	"github.com/btcsuite/goleveldb/leveldb"
 	"github.com/btcsuite/goleveldb/leveldb/filter"
 	"github.com/btcsuite/goleveldb/leveldb/opt"
+	"github.com/btcsuite/goleveldb/leveldb/util"
+	"sync"
 )
 
 type BASTable struct {
+	lock sync.RWMutex
 	database *leveldb.DB
 }
 type Record struct {
@@ -36,6 +39,9 @@ func InitTable(path string) *BASTable {
 }
 
 func (book *BASTable) Find(ba *BasQuery) *Record {
+	book.lock.RLock()
+	defer book.lock.RUnlock()
+
 	if has, err := book.database.Has(ba.BlockAddr, nil); !has || err != nil {
 		fmt.Println(err)
 		return nil
@@ -57,9 +63,12 @@ func (book *BASTable) Find(ba *BasQuery) *Record {
 
 func (book *BASTable) Save(req *RegRequest) error {
 
-	if _, err := book.database.Has(req.BlockAddr, nil); err != nil {
-		return err
-	}
+	book.lock.Lock()
+	defer book.lock.Unlock()
+
+	//if _, err := book.database.Has(req.BlockAddr, nil); err != nil {
+	//	return err
+	//}
 
 	r := &Record{
 		BAddr:   req.BlockAddr,
@@ -78,4 +87,29 @@ func (book *BASTable) Save(req *RegRequest) error {
 		Sync: true,
 	}
 	return book.database.Put(req.BlockAddr, b, wo)
+}
+
+func (book *BASTable)FindAll(keyl1,keyl2 int) []*Record {
+	book.lock.RLock()
+	defer book.lock.RUnlock()
+
+	r:=&util.Range{Start: nil,Limit: nil}
+
+	iter := book.database.NewIterator(r,nil)
+	defer iter.Release()
+
+	var rs []*Record
+
+	for iter.Next(){
+		k:=iter.Key()
+		if len(k) <= keyl2 && len(k) > keyl1{
+			rtmp:= &Record{}
+			if err := json.Unmarshal(iter.Value(), rtmp); err != nil {
+				continue
+			}
+			rs = append(rs,rtmp)
+		}
+	}
+
+	return rs
 }

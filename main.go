@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/hyperorchidlab/BAS/cmd"
 	"github.com/hyperorchidlab/BAS/crypto"
 	"github.com/hyperorchidlab/BAS/dbSrv"
 	"github.com/hyperorchidlab/BAS/querySrv"
@@ -20,7 +21,7 @@ import (
 	"time"
 )
 
-const Version = "1.0.0_gr"
+const Version = "1.1.6"
 
 var param struct {
 	addr  string
@@ -47,6 +48,7 @@ var rootCmd = &cobra.Command{
 
 	Run: mainRun,
 }
+
 var Conf struct {
 	Version bool
 	DBPath  string
@@ -77,6 +79,8 @@ func init() {
 	queryCmd.Flags().Uint8VarP(&param.typ, "netType", "t", 0, "BAS query -t [1:ETH, 2:HOP]")
 
 	rootCmd.AddCommand(queryCmd)
+	rootCmd.AddCommand(cmd.ShowMinerCmd)
+	rootCmd.AddCommand(cmd.ShowPoolCmd)
 }
 
 func main() {
@@ -99,9 +103,12 @@ func mainRun(_ *cobra.Command, _ []string) {
 	saveSrv := regSrv.NewReg(db)
 	done := make(chan bool, 1)
 
+	go cmd.StartCmdService(db)
+
 	go searchSrv.Run(done)
 	go saveSrv.Serve(done)
 	go waitSignal(done)
+
 	<-done
 }
 
@@ -123,6 +130,7 @@ func waitSignal(done chan bool) {
 	fmt.Printf("\n>>>>>>>>>>process finished(%s)<<<<<<<<<<\n", sig)
 	done <- true
 }
+
 
 func queryAction(_ *cobra.Command, _ []string) {
 

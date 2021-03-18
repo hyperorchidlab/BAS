@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package pbs;
+option go_package = ".;pbs";
+
+service CmdService {
+    rpc ShowAllMiners (EmptyRequest) returns (CommonResponse) {}
+    rpc ShowAllPools (EmptyRequest) returns (CommonResponse) {}
+}
+
+message EmptyRequest {
+
+}
+
+
+
+message CommonResponse {
+    string msg = 1;
+}
+
+
+
